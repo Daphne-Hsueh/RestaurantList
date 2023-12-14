@@ -14,13 +14,25 @@ app.get('/', (req, res) => {
   res.redirect('/restaurants')
 })
 
+
 app.get('/restaurants', (req, res) => {
-  res.render('index', { restaurants: restaurants})
+  // console.log("req.query.search: ", req.query.search)
+  const keyword = req.query.search?.trim()
+  const matchedRestaurants = keyword ? restaurants.filter((rt) => 
+    Object.values(rt).some((property) => {
+      if (typeof property === 'string') {
+        return property.toLowerCase().includes(keyword.toLowerCase())
+      }
+      return false
+    })
+  ) : restaurants
+  res.render('index', { restaurants: matchedRestaurants, keyword })
 })
 
 app.get('/restaurants/:id', (req, res) => {
   const id = req.params.id
-  res.send(`read restaurant: ${id}`)
+  const restaurant = restaurants.find((rt) => rt.id.toString() === id)
+  res.render('detail', { restaurant })
 })
 
 app.listen(port, () => {
